@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "564141099015",
+    "project_id": "retailer-project-a8ca1",
+    "storage_bucket": "retailer-project-a8ca1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564141099015:android:8d1cf94dc5d381b1fec2a2",
+        "android_client_info": {
+          "package_name": "com.example.retailer_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564141099015-58h3clopdo1sqaj4cu1g1bgeq3it9ui9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrvttW8saW_XKKwDO17pCcUXr5OmGcNdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "564141099015-58h3clopdo1sqaj4cu1g1bgeq3it9ui9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
