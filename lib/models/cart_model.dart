@@ -1,0 +1,35 @@
+class CartModel {
+  String? prodImage;
+  String? prodId;
+  String? prodCode;
+  String? prodName;
+  String? prodPrice;
+  String? prodMrp;
+
+  CartModel({
+    this.prodImage,
+    this.prodId,
+    this.prodCode,
+    this.prodName,
+    this.prodPrice,
+    this.prodMrp,
+  });
+
+  factory CartModel.fromJson(Map<String, dynamic> json) => CartModel(
+        prodImage: json["prodImage"],
+        prodId: json["prodId"],
+        prodCode: json["prodCode"],
+        prodName: json["prodName"],
+        prodPrice: json["prodPrice"],
+        prodMrp: json["prodMrp"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "prodImage": prodImage,
+        "prodId": prodId,
+        "prodCode": prodCode,
+        "prodName": prodName,
+        "prodPrice": prodPrice,
+        "prodMrp": prodMrp,
+      };
+}

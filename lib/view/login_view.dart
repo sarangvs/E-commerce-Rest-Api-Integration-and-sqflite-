@@ -42,9 +42,10 @@ class _LoginViewState extends State<LoginView> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  !controller.verificationCodeSent
+                  !controller.verificationCodeSent  
                       ? controller.verifyPhone(phoneController.text)
                       : controller.verifyOtp(otpController.text);
+                  controller.update();
                 },
                 child:
                     Text(controller.verificationCodeSent ? "Done" : "Submit"),

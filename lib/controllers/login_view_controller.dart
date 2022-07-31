@@ -1,8 +1,8 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:retailer_app/view/purchase_product_view.dart';
 
 class LoginViewController extends GetxController {
   bool _verificationCodeSent = false;
@@ -21,17 +21,10 @@ class LoginViewController extends GetxController {
   }
 
   void verifyPhone(String phone) async {
-    await FirebaseAuth.instance.verifyPhoneNumber(phoneNumber: phone,
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: "+91$phone",
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
-        await FirebaseAuth.instance
-            .signInWithCredential(phoneAuthCredential)
-            .then((value) {
-          Get.snackbar(
-            "Login Successfull",
-            "Login is completed",
-            snackPosition: SnackPosition.BOTTOM,
-          );
-        });
+        await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
       },
       verificationFailed: (FirebaseAuthException error) {
         Get.snackbar(
@@ -68,8 +61,14 @@ class LoginViewController extends GetxController {
           "Login is completed",
           snackPosition: SnackPosition.BOTTOM,
         );
+        Get.to(() => const PurchaseProductView());
       });
     } on FirebaseAuthException catch (e) {
+      Get.snackbar(
+        "Login Failed",
+        "$e",
+        snackPosition: SnackPosition.BOTTOM,
+      );
       log("Error in verify otp ${e.message}");
     }
   }
