@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:http/http.dart' as http;
+import 'package:retailer_app/db/database_handler.dart';
 import 'package:retailer_app/models/product_model.dart';
 import 'package:retailer_app/models/response_model.dart';
 
@@ -14,7 +14,18 @@ class ProductService {
       final responseModel = responseModelFromJson(response.body);
       // DatabaseHelper.createProducts(responseModel.data!.products!);
       // log(response.body);
-      return responseModel.data?.products;
+      final dbData = await DatabaseHelper.retrieveProductData();
+
+      for (var product in responseModel.data!.products!) {
+        final isContain =
+            dbData.any((element) => element.prodId! == product.prodId!);
+        if (!isContain) {
+          await DatabaseHelper.insertProductItem([product]);
+        }
+      }
+      return await DatabaseHelper.retrieveProductData();
+   
+
     }
     return null;
   }

@@ -1,8 +1,14 @@
 import 'package:badges/badges.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:retailer_app/controllers/product_purchase_view_controller.dart';
 import 'package:get/get.dart';
+import 'package:retailer_app/models/product_model.dart';
+import 'package:retailer_app/service/prodect_service.dart';
 import 'package:retailer_app/view/cart_view.dart';
+import 'package:retailer_app/widgets/add_to_cart.dart';
+import 'package:retailer_app/widgets/product_header.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class PurchaseProductView extends StatefulWidget {
   const PurchaseProductView({Key? key}) : super(key: key);
@@ -12,106 +18,148 @@ class PurchaseProductView extends StatefulWidget {
 }
 
 class _PurchaseProductViewState extends State<PurchaseProductView> {
-  final controller = Get.put(PurchaseProductViewController());
+  final purchaseProductViewController =
+      Get.put(PurchaseProductViewController());
+
+  late int state;
 
   @override
   void initState() {
     super.initState();
-    controller.getProducts();
+
+    purchaseProductViewController.fetchCartCount();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return GetBuilder<PurchaseProductViewController>(
-      builder: (controller) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text("Purchase Product"),
-            centerTitle: true,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Badge(
-                  badgeContent: Text(
-                    "${controller.cartProducts.length}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  position: const BadgePosition(start: 30, bottom: 30),
-                  child: IconButton(
-                    onPressed: () {
-                      Get.to(() => CartView);
-                    },
-                    icon: const Icon(Icons.shopping_cart),
-                  ),
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Theme.of(context).canvasColor,
+        floatingActionButton: GetBuilder<PurchaseProductViewController>(
+          id: "cartCount",
+          builder: (controller) {
+            return Badge(
+              badgeColor: Colors.white,
+              padding: const EdgeInsets.all(8),
+              badgeContent: Text(
+                "${controller.cartCount}",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
-          ),
-          body: controller.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(6),
-                  itemBuilder: (context, index) {
-                    final products = controller.products!.elementAt(index);
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: SizedBox(
-                        width: 100,
-                        child: Image.network(
-                          products.prodImage ?? "",
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/images/error-image.jpeg",
-                            );
-                          },
-                        ),
-                      ),
-                      title: Text(products.prodName ?? ""),
-                      subtitle: Text(products.prodPrice ?? ""),
-                      trailing: InkWell(
-                        onTap: controller.cartProducts.contains(products)
-                            ? null
-                            : () async {
-                                controller.cartProducts.add(products);
+              child: FloatingActionButton(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  onPressed: () {
+                    Get.to(() => const CartView());
+                  },
+                  child: const Icon(
+                    CupertinoIcons.cart,
+                    color: Colors.white,
+                  )),
+            );
+          },
+        ),
+        body: SafeArea(
+          child: Container(
+            padding: Vx.m32,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CatalogHeader(),
+                Expanded(
+                  child: FutureBuilder(
+                    future: ProductService.getProducts(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<ProductModel>?> snapshot) {
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final products = snapshot.data!;
+                        if (products.isNotEmpty) {
+                          return ListView.separated(
+                            padding: const EdgeInsets.all(6),
+                            itemCount: products.length,
+                            itemBuilder: (context, index) {
+                              final product = snapshot.data![index];
 
-                                await controller
-                                    .insertToDb(controller.cartProducts);
-                                controller.update();
-                              },
-                        child: Container(
-                          width: 70,
-                          height: 27,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            color: Colors.blue,
-                          ),
-                          child: Center(
-                            child: Text(
-                              controller.cartProducts.contains(products)
-                                  ? "Added"
-                                  : "Add",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox(height: 10);
-                  },
-                  itemCount: controller.products!.length,
+                              return ProductCard(
+                                productModel: product,
+                                controller: purchaseProductViewController,
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              return const SizedBox(height: 10);
+                            },
+                          );
+                        } else {
+                          return const Center(
+                            child: Text("Empty"),
+                          );
+                        }
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        return const Center(child: Text("ERROR"));
+                      }
+                    },
+                  ),
                 ),
-        );
-      },
-    );
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class ProductCard extends StatelessWidget {
+  final ProductModel productModel;
+  final PurchaseProductViewController controller;
+
+  const ProductCard({
+    Key? key,
+    required this.productModel,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var children2 = [
+      SizedBox(
+        width: 150,
+        height: 60,
+        child: Image.network(
+          productModel.prodImage ?? "",
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            "assets/images/error-image.jpeg",
+          ),
+        ),
+      ),
+      30.widthBox.box.make(),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          10.heightBox.box.make(),
+          '${productModel.prodName}'
+              .text
+              .lg
+              .color(context.accentColor)
+              .bold
+              .make(),
+          "₹${productModel.prodPrice}".text.bold.xl.make(),
+          20.heightBox.box.make(),
+          AddToCart(
+            controller: controller,
+            productModel: productModel,
+          )
+        ],
+      ).p(context.isMobile ? 0 : 16)
+    ];
+    return VxBox(
+      child: Row(
+        children: children2,
+      ),
+    ).color(context.cardColor).rounded.square(150).make().py16();
   }
 }

@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:retailer_app/view/purchase_product_view.dart';
+import 'package:retailer_app/theme/theme.dart';
+import 'package:retailer_app/utils/utils.dart';
+import 'package:retailer_app/view/welcome_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +18,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      scaffoldMessengerKey: Utils.snackbarKey,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const PurchaseProductView(),
+      theme: MyTheme.themeData(context),
+      home: const WelcomeView(),
     );
   }
 }

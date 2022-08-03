@@ -27,6 +27,8 @@ class ProductModel {
     this.prodSell,
     this.prodFreeItem,
     this.prodRkPrice,
+    this.isAddedToCart = 'false',
+    this.isEffected = 0,
   });
 
   String? prodImage;
@@ -56,8 +58,12 @@ class ProductModel {
   String? prodSell;
   String? prodFreeItem;
   String? prodRkPrice;
+  String isAddedToCart;
+  int? isEffected;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
+     
+    isAddedToCart:'false',
         prodImage: json["prodImage"],
         prodId: json["prodId"],
         prodCode: json["prodCode"],
@@ -94,5 +100,7 @@ class ProductModel {
         "prodName": prodName,
         "prodPrice": prodPrice,
         "prodMrp": prodMrp,
+        "isAddedToCart": isAddedToCart,
+        "isEffected":isEffected,
       };
 }
