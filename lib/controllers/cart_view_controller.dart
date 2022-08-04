@@ -9,11 +9,14 @@ class CartViewController extends GetxController {
 
   int count = 0;
 
+  double totalPrice = 0;
+
   @override
   void onInit() {
     super.onInit();
 
     getCount();
+    retriveDbData();
     count = DatabaseHelper.queryResult.length;
     print("$count");
   }
@@ -22,7 +25,30 @@ class CartViewController extends GetxController {
     return await DatabaseHelper.retrieveData();
   }
 
-  List<CartModel?> cartList = [];
+  List<CartModel> cartList = [];
 
   List<int> itemCount = [];
+
+  void loadTotalPrice() {
+    totalPrice = 0;
+    if (cartList.length == itemCount.length) {
+      for (int index = 0; index < cartList.length; index++) {
+        final prodPrice = double.parse("${cartList[index].prodPrice}");
+        final result = prodPrice * itemCount[index];
+        totalPrice = totalPrice + result;
+      }
+    }
+    update(["totalPrice"]);
+  }
+
+  Future<void> retriveDbData() async {
+    final value = await DatabaseHelper.retrieveData();
+    cartList = value;
+    itemCount.clear();
+    for (int i = 0; i < cartList.length; i++) {
+      itemCount.add(1);
+    }
+    update(["getData"]);
+    loadTotalPrice();
+  }
 }

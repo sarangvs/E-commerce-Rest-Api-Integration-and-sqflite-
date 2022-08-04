@@ -6,84 +6,63 @@ import 'package:retailer_app/db/database_handler.dart';
 import 'package:retailer_app/models/cart_model.dart';
 
 class CartView extends StatelessWidget {
-  const CartView({Key? key}) : super(key: key);
-
+  CartView({Key? key}) : super(key: key);
+  final cartViewController = Get.put(CartViewController());
   @override
   Widget build(BuildContext context) {
-    final cartViewController = Get.put(CartViewController());
     return Scaffold(
       appBar: _buildAppBar(context, cartViewController),
-      body: GetBuilder<CartViewController>(
-        builder: (controller) {
-          controller.itemCount.clear();
-          for (int i = 0;
-              i < controller.productPurchaseViewController.cartProducts.length;
-              i++) {
-            controller.itemCount.add(1);
-          }
-          return Stack(
+      body: Stack(
+        children: [
+          Column(
             children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: FutureBuilder<List<CartModel>>(
-                      future: DatabaseHelper.retrieveData(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<CartModel>> snapshot) {
-                        if (snapshot.hasData) {
-                          return ListView.separated(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              final model = snapshot.data![index];
-                              controller.cartList = snapshot.data!;
+              Expanded(
+                  child: GetBuilder<CartViewController>(
+                      id: "getData",
+                      builder: (controller) {
+                        return ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: controller.cartList.length,
+                          itemBuilder: (context, index) {
+                            final model = controller.cartList.elementAt(index);
 
-                              return Dismissible(
-                                background: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: const [
-                                      Spacer(),
-                                      Icon(CupertinoIcons.trash),
-                                    ],
-                                  ),
+                            return Dismissible(
+                              background: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                key: Key(model.prodId!),
-                                onDismissed: (direction) {
-                                  DatabaseHelper.deleteData(
-                                    int.parse(model.prodId!),
-                                  );
-                                  SnackBar snackBar = const SnackBar(
-                                      content: Text("Item has been deleted"));
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                },
-                                child: CartCard(
-                                  cartModel: model,
-                                  controller: cartViewController,
-                                  index: index,
+                                child: Row(
+                                  children: const [
+                                    Spacer(),
+                                    Icon(CupertinoIcons.trash),
+                                  ],
                                 ),
-                              );
-                            },
-                            separatorBuilder: (context, index) {
-                              return const SizedBox(height: 10);
-                            },
-                          );
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                              ),
+                              key: Key(model.prodId!),
+                              onDismissed: (direction) {
+                                DatabaseHelper.deleteData(
+                                  int.parse(model.prodId!),
+                                );
+                                SnackBar snackBar = const SnackBar(
+                                    content: Text("Item has been deleted"));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              },
+                              child: CartCard(
+                                cartModel: model,
+                                controller: cartViewController,
+                                index: index,
+                              ),
+                            );
+                          },
+                          separatorBuilder: (context, index) {
+                            return const SizedBox(height: 10);
+                          },
+                        );
+                      },),),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -95,16 +74,21 @@ class CartView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text("Total Price"),
-                          SizedBox(height: 5),
-                          Text(
-                            "Rs: 10000",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
+                        children: [
+                          const Text("Total Price"),
+                          const SizedBox(height: 5),
+                          GetBuilder<CartViewController>(
+                              id: "totalPrice",
+                              builder: (controller) {
+                                return Text(
+                                  "Rs: ${controller.totalPrice}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              })
                         ],
                       ),
                       InkWell(
@@ -146,40 +130,37 @@ class CartView extends StatelessWidget {
                 ),
               )
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  
-  }
-
-  AppBar _buildAppBar(BuildContext context, CartViewController controller) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new),
-        onPressed: () {
-          Get.back();
-        },
-      ),
-      backgroundColor: Colors.transparent,
-      centerTitle: true,
-      title: Column(
-        children: [
-          const Text(
-            "Your Cart",
-            style: TextStyle(color: Colors.black),
-          ),
-          Text(
-            "${controller.productPurchaseViewController.cartCount} items",
-            style: Theme.of(context).textTheme.caption,
           ),
         ],
       ),
     );
   }
+}
 
+AppBar _buildAppBar(BuildContext context, CartViewController controller) {
+  return AppBar(
+    leading: IconButton(
+      icon: const Icon(Icons.arrow_back_ios_new),
+      onPressed: () {
+        Get.back();
+      },
+    ),
+    backgroundColor: Colors.transparent,
+    centerTitle: true,
+    title: Column(
+      children: [
+        const Text(
+          "Your Cart",
+          style: TextStyle(color: Colors.black),
+        ),
+        Text(
+          "${controller.productPurchaseViewController.cartCount} items",
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    ),
+  );
+}
 
 class CartCard extends StatelessWidget {
   final int index;
@@ -197,94 +178,107 @@ class CartCard extends StatelessWidget {
     return Material(
       borderRadius: BorderRadius.circular(12),
       color: Colors.grey[200],
-      child: Column(
-        children: [
-          Row(
+      child: GetBuilder<CartViewController>(
+        id: "count",
+        builder: (controller) {
+          final value = double.parse("${cartModel.prodPrice}");
+          final count = value * controller.itemCount[index];
+          return Column(
             children: [
-              SizedBox(
-                width: 88,
-                child: AspectRatio(
-                  aspectRatio: 0.88,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Image.network(
-                      cartModel.prodImage ?? "",
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          "assets/images/error-image.jpeg",
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
                   SizedBox(
-                    width: Get.width / 1.8,
-                    child: Text(
-                      cartModel.prodName!,
-                      style: const TextStyle(color: Colors.black, fontSize: 16),
-                      maxLines: 2,
+                    width: 88,
+                    child: AspectRatio(
+                      aspectRatio: 0.88,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Image.network(
+                          cartModel.prodImage ?? "",
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              "assets/images/error-image.jpeg",
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(width: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: Get.width / 1.8,
+                        child: Text(
+                          cartModel.prodName!,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "₹$count ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.secondary),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      if (controller.itemCount[index] > 0) {
+                        controller.itemCount[index]--;
+                        controller.loadTotalPrice();
+                        CartModel model = cartModel
+                          ..itemCount = controller.itemCount[index];
+                        await DatabaseHelper.updateCart(model);
+                        controller.update(["count"]);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.remove,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
                   Text(
-                    "₹${cartModel.prodPrice}",
+                    "${cartModel.itemCount}",
                     style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.secondary),
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      controller.itemCount[index]++;
+                      controller.loadTotalPrice();
+                      CartModel model = cartModel
+                        ..itemCount = controller.itemCount[index];
+                      await DatabaseHelper.updateCart(model);
+                      controller.update(["count"]);
+                    },
+                    icon: Icon(
+                      Icons.add,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                   ),
                 ],
-              )
+              ),
             ],
-          ),
-          GetBuilder<CartViewController>(
-              id: "count",
-              builder: (controller) {
-                controller.itemCount.clear();
-                for (int i = 0;
-                    i <
-                        controller
-                            .productPurchaseViewController.cartProducts.length;
-                    i++) {
-                  controller.itemCount.add(1);
-                }
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.remove,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                    Text(
-                      "${2}",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        controller.itemCount[index]++;
-                        controller.update(["count"]);
-                      },
-                      icon: Icon(Icons.add,
-                          color: Theme.of(context).colorScheme.secondary),
-                    ),
-                  ],
-                );
-              }),
-        ],
+          );
+        },
       ),
     );
   }

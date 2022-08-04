@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +13,9 @@ import 'package:retailer_app/widgets/product_header.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class PurchaseProductView extends StatefulWidget {
-  const PurchaseProductView({Key? key}) : super(key: key);
+  final String retailername;
+  const PurchaseProductView({Key? key, required this.retailername})
+      : super(key: key);
 
   @override
   State<PurchaseProductView> createState() => _PurchaseProductViewState();
@@ -32,6 +36,11 @@ class _PurchaseProductViewState extends State<PurchaseProductView> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 60,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
         backgroundColor: Theme.of(context).canvasColor,
         floatingActionButton: GetBuilder<PurchaseProductViewController>(
           id: "cartCount",
@@ -49,7 +58,7 @@ class _PurchaseProductViewState extends State<PurchaseProductView> {
               child: FloatingActionButton(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   onPressed: () {
-                    Get.to(() => const CartView());
+                    Get.to(() => CartView());
                   },
                   child: const Icon(
                     CupertinoIcons.cart,
@@ -60,11 +69,11 @@ class _PurchaseProductViewState extends State<PurchaseProductView> {
         ),
         body: SafeArea(
           child: Container(
-            padding: Vx.m32,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CatalogHeader(),
+                CatalogHeader(retailerName: widget.retailername),
                 Expanded(
                   child: FutureBuilder(
                     future: ProductService.getProducts(),
@@ -100,7 +109,8 @@ class _PurchaseProductViewState extends State<PurchaseProductView> {
                           child: CircularProgressIndicator(),
                         );
                       } else {
-                        return const Center(child: Text("ERROR"));
+                        log("${snapshot.error}");
+                        return const Center(child: Text("Nothing found "));
                       }
                     },
                   ),
@@ -141,12 +151,13 @@ class ProductCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           10.heightBox.box.make(),
-          '${productModel.prodName}'
-              .text
-              .lg
-              .color(context.accentColor)
-              .bold
-              .make(),
+          SizedBox(
+            width: 160,
+            child: Text(
+              "${productModel.prodName}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           "₹${productModel.prodPrice}".text.bold.xl.make(),
           20.heightBox.box.make(),
           AddToCart(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:retailer_app/theme/theme.dart';
 import 'package:retailer_app/utils/utils.dart';
-import 'package:retailer_app/view/welcome_view.dart';
+import 'package:retailer_app/view/home_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       theme: MyTheme.themeData(context),
-      home: const WelcomeView(),
+      home: const HomeView(),
     );
   }
 }

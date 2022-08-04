@@ -31,7 +31,7 @@ class DatabaseHelper {
         await database.execute(
             'CREATE TABLE products(prodId TEXT, isEffected INTEGER DEFAULT 0, prodImage TEXT, prodCode TEXT, prodName TEXT, prodPrice TEXT, prodMrp TEXT, isAddedToCart TEXT)');
         await database.execute(
-            'CREATE TABLE cart(prodId TEXT, prodImage TEXT, prodCode TEXT, prodName TEXT, prodPrice TEXT, prodMrp TEXT)');
+            'CREATE TABLE cart(prodId TEXT, prodImage TEXT, prodCode TEXT, prodName TEXT, prodPrice TEXT, prodMrp TEXT, itemCount INTEGER DEFAULT 1)');
       },
     );
   }
@@ -88,15 +88,17 @@ class DatabaseHelper {
   }
 
 //update data to cart table
-  static Future<int> update(CartModel cartModel) async {
-    Database db = await DatabaseHelper.initializeDB();
-    return await db.update(
+  static Future<int> updateCart(CartModel cartModel) async {
+    log("${cartModel.toJson()}");
+    final db = await DatabaseHelper.initializeDB();
+    final result = await db.update(
       'cart',
       cartModel.toJson(),
       where: 'prodId = ?',
       whereArgs: [cartModel.prodId],
-      conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    log("${cartModel.itemCount}");
+    return result;
   }
 
 // update data to Product table
@@ -125,5 +127,10 @@ class DatabaseHelper {
     final db = await initializeDB();
     await db.delete('products', where: 'prodId = ?', whereArgs: [id]);
     log("deleted");
+  }
+
+  static Future<void> deleteCartDb() async {
+    final db = await initializeDB();
+    await db.delete('cart');
   }
 }

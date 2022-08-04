@@ -99,6 +99,6 @@ class PurchaseProductViewController extends GetxController {
     final List<CartModel> cart = [cartModel];
 
     await DatabaseHelper.insert(cart);
-    update();
+    update(["addToCart"]);
   }
 }

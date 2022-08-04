@@ -12,8 +12,6 @@ class ProductService {
     log("${response.statusCode}");
     if (response.statusCode == 200) {
       final responseModel = responseModelFromJson(response.body);
-      // DatabaseHelper.createProducts(responseModel.data!.products!);
-      // log(response.body);
       final dbData = await DatabaseHelper.retrieveProductData();
 
       for (var product in responseModel.data!.products!) {
@@ -24,8 +22,6 @@ class ProductService {
         }
       }
       return await DatabaseHelper.retrieveProductData();
-   
-
     }
     return null;
   }

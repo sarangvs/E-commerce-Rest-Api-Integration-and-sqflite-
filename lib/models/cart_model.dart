@@ -5,6 +5,7 @@ class CartModel {
   String? prodName;
   String? prodPrice;
   String? prodMrp;
+  int itemCount;
 
   CartModel({
     this.prodImage,
@@ -13,6 +14,7 @@ class CartModel {
     this.prodName,
     this.prodPrice,
     this.prodMrp,
+    this.itemCount = 1,
   });
 
   factory CartModel.fromJson(Map<String, dynamic> json) => CartModel(
@@ -31,5 +33,6 @@ class CartModel {
         "prodName": prodName,
         "prodPrice": prodPrice,
         "prodMrp": prodMrp,
+        "itemCount": itemCount,
       };
 }
